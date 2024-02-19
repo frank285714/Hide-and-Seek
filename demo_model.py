@@ -27,8 +27,8 @@ openai.api_key = "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"
 tasks = ['trans']
 
 # specify base model
-#base_model = 'bloomz-560m'
-base_model = 'bloomz-1b7'
+base_model = 'bloomz-560m'
+# base_model = 'bloomz-1b7'
 base_model_dir = f'./models/{base_model}'
 
 # specify langauge
@@ -36,8 +36,8 @@ lang = 'en'
 
 # specify lora weights
 hide_model_path = f"./lora_weights/hide_{base_model}_{lang}/checkpoint-6300"
-hide_method = 'model1b7'
-#hide_method = 'model560m'
+# hide_method = 'model1b7'
+hide_method = 'model560m'
 seek_model_path = f"./lora_weights/seek-%s_{hide_method}_{base_model}_{lang}/checkpoint-2700"
 
 # special tokens
@@ -168,7 +168,10 @@ def recover_text(sub_content, sub_output, content, model, tokenizer, task_type, 
 if __name__ == '__main__':
     # load models
     print('loading model...')
-    model = AutoModelForCausalLM.from_pretrained(base_model_dir, load_in_4bit=True, quantization_config=bnb_config, device_map='cuda:0', trust_remote_code=True, torch_dtype=torch.float16)
+    is_gpu=torch.cuda.is_available()
+    model = AutoModelForCausalLM.from_pretrained(base_model_dir, load_in_4bit=is_gpu, quantization_config=bnb_config,
+                                                 # device_map='cuda:0',
+                                                 trust_remote_code=True, torch_dtype=torch.float16)
     tokenizer = AutoTokenizer.from_pretrained(base_model_dir, trust_remote_code=True)
     smart_tokenizer_and_embedding_resize(tokenizer=tokenizer,model=model)
     spacy_model = spacy.load(f'{lang}_core_web_trf')
